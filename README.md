@@ -46,7 +46,7 @@ see [QGIS website](https://www.qgis.org/).
 
 + Openlayers
 
-Openlayers is a javascript WebGIS library, there's a [vector tile demo](). 
+Openlayers is a javascript WebGIS library, there's a [vector tile demo](https://openlayers.org/en/latest/examples/vector-tile-info.html). 
 You have to release the xyz tile service first, or extract tiles into a folder.
 However nowadays the you can not copy, modify the URL and run the demo directly. I'll post a demo later.
 
@@ -58,4 +58,5 @@ Mapbox has a lot of on-line mapping services, however not all of them are free.
 6. Styling
 
 Not in this project!
+Modify Mapbox's tool is a practice idea
 
