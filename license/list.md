@@ -1,1 +1,1 @@
-mapbox/vector-tile-spec: mvtspec.md
+[mapbox/vector-tile-spec](https://github.com/mapbox/vector-tile-spec/blob/master/LICENSE): mvtspec.md
