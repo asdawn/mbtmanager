@@ -1,3 +1,4 @@
+*译文仅保留骨架部分*
 # MBTiles 1.3
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
