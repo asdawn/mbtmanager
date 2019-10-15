@@ -1,32 +1,13 @@
-*译文仅保留骨架部分*
+*译文仅保留骨架部分，本程序直接参考MBTiles规范最新版本（1.3）。*
 # MBTiles 1.3
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in
-this document are to be interpreted as described in [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
+## 摘要
 
-## Abstract
+MBTiles是实用[SQLite](http://sqlite.org/)存储瓦片地图的一种规范。
 
-MBTiles is a specification for storing tiled map data in
-[SQLite](http://sqlite.org/) databases for immediate usage and for transfer.
-MBTiles files, known as **tilesets**, MUST implement the specification below
-to ensure compatibility with devices.
+MBTiles文件（即**tilesets**）应遵循以下规范以确保兼容性。
 
-## Compatibility
-
-*This section is informative and does not add requirements to implementations.*
-
-Because views may be used to produce the MBTiles schema, two implementations
-may store tiles with different internal details, meaning one implementation
-may not be able to add to an existing file.
-
-As a container format, MBTiles can store any tiled data, so data can be stored
-that an implementation cannot do anything with.
-
-Relying on metadata keys not defined in the specification can cause
-compatibility problems.
-
-## Database Specifications
+## 数据库规范
 
 Tilesets SHALL be valid SQLite databases of
 [version 3.0.0](http://sqlite.org/formatchng.html) or higher.
@@ -35,29 +16,32 @@ Only core SQLite features are permitted; tilesets SHALL NOT require extensions.
 MBTiles databases MAY use [the officially assigned magic number](http://www.sqlite.org/src/artifact?ci=trunk&filename=magic.txt)
 to be easily identified as MBTiles.
 
-## Database
+## 数据库
 
 Note: the schemas outlined are meant to be followed as interfaces.
 SQLite views that produce compatible results MAY be used instead.
 For convenience, this specification refers to tables and virtual
 tables (views) as tables.
 
-## Charset
+## 字符集
 
-All text in `text` columns of tables in an mbtiles tileset MUST be encoded as UTF-8.
+所有`text`类型的字段应使用UTF-8字符编码。
 
-### Metadata
+### 元数据部分
 
-#### Schema
+#### 模式
 
-The database MUST contain a table or view named `metadata`.
+数据库必须包含名为 `metadata`的表或视图。
 
-This table or view MUST yield exactly two columns of type `text`, named `name` and
-`value`. A typical create statement for the `metadata` table:
+`metadata`严格由两列组成：
++ 字段名`name`，类型`text`
++ 字段名`value`，类型`text`
 
-    CREATE TABLE metadata (name text, value text);
+典型的建表语句：
 
-#### Content
+   ``` CREATE TABLE metadata (name text, value text);```
+
+#### 内容
 
 The metadata table is used as a key/value store for settings. It MUST contain these two rows:
 
@@ -97,9 +81,9 @@ The `metadata` table MAY contain additional rows for tilesets that implement
 [UTFGrid-based interaction](https://github.com/mapbox/utfgrid-spec) or for
 other purposes.
 
-### Tiles
+### 瓦片部分
 
-#### Schema
+#### 模式
 
 The database MUST contain a table named `tiles`.
 
@@ -113,7 +97,7 @@ The database MAY contain an index for efficient access to this table:
 
     CREATE UNIQUE INDEX tile_index on tiles (zoom_level, tile_column, tile_row);
 
-#### Content
+#### 内容
 
 The tiles table contains tiles and the values used to locate them.
 The `zoom_level`, `tile_column`, and `tile_row` columns MUST encode the location
@@ -129,13 +113,13 @@ to request individual tiles, so the tile commonly referred to as 11/327/791 is i
 The `tile_data` column MUST contain the raw binary image or vector tile data
 for the associated tile as a `blob`.
 
-### Grids
+### 瓦片格网
 
 _See the [UTFGrid specification](https://github.com/mapbox/utfgrid-spec) for
 implementation details of grids and interaction metadata itself: the MBTiles
 specification is only concerned with storage._
 
-#### Schema
+#### 模式
 
 The database MAY have tables named `grids` and `grid_data`.
 
@@ -151,14 +135,14 @@ A typical create statement for the `grid_data` table:
 
     CREATE TABLE grid_data (zoom_level integer, tile_column integer, tile_row integer, key_name text, key_json text);
 
-#### Content
+#### 内容
 
 The `grids` table, if present, MUST contain UTFGrid data, compressed in `gzip` format.
 
 The `grid_data` table, if present, MUST contain grid key to value mappings, with values encoded
 as JSON objects.
 
-## Vector tileset metadata
+## 矢量瓦片元数据
 
 As mentioned above, Mapbox Vector Tile tilesets MUST include a `json` row in the `metadata` table
 to summarize what layers are available in the tiles and what attributes are available for the
@@ -166,7 +150,7 @@ features in those layers.
 
 The `json` row, if present, MUST contain the UTF-8 string representation of a JSON object.
 
-### Vector_layers
+### 矢量图层
 
 The JSON object in the `json` row MUST contain a `vector_layers` key, whose value is an array of JSON objects.
 Each of those JSON objects describes one layer of vector tile data, and MUST contain the following key-value pairs:
@@ -200,7 +184,7 @@ repository. Like the `vector_layers`, it lists the tileset's layers and the attr
 within each layer, but also gives sample values for each attribute and the range of values for
 numeric attributes.
 
-### Example
+### 示例
 
 A vector tileset that contains United States counties and primary roads from [TIGER](https://www.census.gov/geo/maps-data/data/tiger-line.html) might
 have the following metadata table:
@@ -381,7 +365,7 @@ have the following metadata table:
 
 ```
 
-## Future directions
+## 未来的改进方向
 
 In a future revision of this specification, the `metadata` table
 will contain a `compression` row to indicate the type of compression
