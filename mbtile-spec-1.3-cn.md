@@ -109,39 +109,9 @@ MBTiles文件可以使用[官方定义幻数the officially assigned magic number
 
 *注释：即每条记录存储一个瓦片，数据用`tile_data`，编号用`zoom_level`、`tile_column`和`tile_row`*
 
---------------
-此部分涉及UTFGrid（即属性值瓦片格式）规范，暂时跳过。
 
-### 格网
+**UTFGrid（即属性值瓦片格式）部分暂时跳过！**
 
-_请参阅[UTFGrid规范](https://github.com/mapbox/utfgrid-spec)。MBTiles规范仅关注数据的存储。 for
-implementation details of grids and interaction metadata itself: the MBTiles
-specification is only concerned with storage._
-
-#### 模式
-
-The database MAY have tables named `grids` and `grid_data`.
-
-The `grids` table MUST contain three columns of type `integer`, named `zoom_level`, `tile_column`,
-and `tile_row`, and one of type `blob`, named `grid`.
-A typical create statement for the `grids` table:
-
-    CREATE TABLE grids (zoom_level integer, tile_column integer, tile_row integer, grid blob);
-
-The `grid_data` table MUST contain three columns of type `integer`, named `zoom_level`, `tile_column`,
-and `tile_row`, and two of type `text`, named `key_name`, and `key_json`.
-A typical create statement for the `grid_data` table:
-
-    CREATE TABLE grid_data (zoom_level integer, tile_column integer, tile_row integer, key_name text, key_json text);
-
-#### 内容
-
-`grids`表若存在，则， MUST contain UTFGrid data, compressed in `gzip` format.
-
-The `grid_data` table, if present, MUST contain grid key to value mappings, with values encoded
-as JSON objects.
-
-------------------
 
 ## 矢量瓦片元数据
 
@@ -168,7 +138,7 @@ as JSON objects.
 
 这些键值对用来应对同一个MBTiles文件中不同图层有数据的缩放级别也不同的情况，例如"minor roads"图层仅在较高的缩放级别上有数据。
 
-**注释：说的这么麻烦，看看下边的示例就明白了，JSON字符串的大致结构是
+**注释：说的这么麻烦，看看下边的示例就明白了，JSON字符串的大致结构是**
 ```
 {  
    //矢量瓦片必选的vector_layers
@@ -190,8 +160,6 @@ as JSON objects.
    "tilestats": {......}
 }
 ``` 
-**
-
 **注释：矢量瓦片允许包含多个图层，不过本程序不关心瓦片内容，只关心瓦片的存储与整个MBTiles的Metadata，且只考虑单图层矢量瓦片**。
 
 ### Tilestats
