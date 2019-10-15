@@ -182,8 +182,9 @@ numeric attributes.
 
 ### 示例
 
-A vector tileset that contains United States counties and primary roads from [TIGER](https://www.census.gov/geo/maps-data/data/tiger-line.html) might
-have the following metadata table:
+包含美国县界及主要道路的矢量瓦片数据（源于[TIGER](https://www.census.gov/geo/maps-data/data/tiger-line.html)） 的`metadata`表的内容如下：
+
+*注释：美国的县级别差不多相当于中国的地级市。反正页面打不开，只看看格式就好了*
 
 * `name`: `TIGER 2016`
 * `format`: `pbf`
