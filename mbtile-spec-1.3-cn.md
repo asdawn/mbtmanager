@@ -169,11 +169,11 @@ as JSON objects.
 这些键值对用来应对同一个MBTiles文件中不同图层有数据的缩放级别也不同的情况，例如"minor roads"图层仅在较高的缩放级别上有数据。
 
 **注释：说的这么麻烦，看看下边的示例就明白了，JSON字符串的大致结构是
-```JSON
+```
 {  
    //矢量瓦片必选的vector_layers
    "vector_layers": [
-      //图层1描述
+      //第一个图层的描述
       {    
          "id": "图层的ID",
          "description": 图层描述信息,
