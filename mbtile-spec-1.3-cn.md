@@ -1,4 +1,4 @@
-*译文仅保留骨架部分，本程序直接参考MBTiles规范最新版本（1.3）。*
+*译文仅保留骨架部分，并添加了注释。本程序直接参考MBTiles规范最新版本（1.3）。*
 # MBTiles 1.3
 
 ## 摘要
@@ -9,19 +9,16 @@ MBTiles文件（即**tilesets**）应遵循以下规范以确保兼容性。
 
 ## 数据库规范
 
-Tilesets SHALL be valid SQLite databases of
-[version 3.0.0](http://sqlite.org/formatchng.html) or higher.
-Only core SQLite features are permitted; tilesets SHALL NOT require extensions.
+MBTiles文件应使用SQLite数据库的[version 3.0.0](http://sqlite.org/formatchng.html) 及以上版本。仅允许使用SQLite的核心功能，不允许使用扩展。
 
-MBTiles databases MAY use [the officially assigned magic number](http://www.sqlite.org/src/artifact?ci=trunk&filename=magic.txt)
-to be easily identified as MBTiles.
+MBTiles文件可以使用[官方定义幻数the officially assigned magic number](http://www.sqlite.org/src/artifact?ci=trunk&filename=magic.txt)进行标识，文件头Offset 68，取值0x4d504258表示应用类型为`MBTiles tileset`。
+
+**注释：设置方法为：```PRAGMA application_id =1297105496 ;```**
 
 ## 数据库
 
-Note: the schemas outlined are meant to be followed as interfaces.
-SQLite views that produce compatible results MAY be used instead.
-For convenience, this specification refers to tables and virtual
-tables (views) as tables.
+注意：这里数据库模式采用接口式描述，即只要返回的查询结果符合要求，实际采用表或者视图均可，后续描述不特别区分`表`和`视图`两个术语，统称为`表`。
+**注释：无特殊需求时建议仅使用表，否则修改、更新会比较麻烦**
 
 ## 字符集
 
@@ -43,75 +40,74 @@ tables (views) as tables.
 
 #### 内容
 
-The metadata table is used as a key/value store for settings. It MUST contain these two rows:
+元数据表采用key/value式存储。
 
-* `name` (string): The human-readable name of the tileset.
-* `format` (string): The file format of the tile data: `pbf`, `jpg`, `png`, `webp`, or an [IETF media type](https://www.iana.org/assignments/media-types/media-types.xhtml) for other formats.
+**2个必选属性对：**
 
-`pbf` as a `format` refers to gzip-compressed vector tile data in
-[Mapbox Vector Tile](https://github.com/mapbox/vector-tile-spec/) format.
+* `name`: 瓦片数据集的名称。
+* `format`: 瓦片数据的格式，可以为`pbf`, `jpg`, `png`, `webp`或[IETF media type](https://www.iana.org/assignments/media-types/media-types.xhtml)列出的其他类型。
 
-The `metadata` table SHOULD contain these four rows:
+其中，`pbf` 对应于[MMVT瓦片格式](https://github.com/mapbox/vector-tile-spec/)，是一种GZIP压缩的矢量瓦片格式。
 
-* `bounds` (string of comma-separated numbers): The maximum extent of the rendered map area. Bounds must define an
-  area covered by all zoom levels. The bounds are represented as `WGS 84`
-  latitude and longitude values, in the OpenLayers Bounds format
-  (left, bottom, right, top). For example, the `bounds` of the full Earth, minus the poles, would be:
-  `-180.0,-85,180,85`.
-* `center` (string of comma-separated numbers): The longitude, latitude, and zoom level of the default view of the map.
-  Example: `-122.1906,37.7599,11`
-* `minzoom` (number): The lowest zoom level for which the tileset provides data
-* `maxzoom` (number): The highest zoom level for which the tileset provides data
+**4个应该包含（强烈建议）的属性对：**
 
-The `metadata` table MAY contain these four rows:
+* `bounds`: WGS坐标系下的瓦片边界，采用OpenLayers边界格式表述(左, 下, 右, 上)。例如，全球的范围表示为：`-180.0,-85,180,85`。
 
-* `attribution` (HTML string): An attribution string, which explains the sources of
-  data and/or style for the map.
-* `description` (string): A description of the tileset's content.
-* `type` (string): `overlay` or `baselayer`
-* `version` (number): The version of the tileset.
-  This refers to a revision of the tileset itself, not of the MBTiles specification.
+**注释：由于Web墨卡托坐标系的限制，普通地图纬度的极限大致在南北纬85度**
 
-If the `format` is `pbf`, the `metadata` table MUST contain this row:
+* `center` 默认视图中心点，由经度、维度、缩放级别组成，例如`-122.1906,37.7599,11`。
+* `minzoom` : 存储的瓦片数据的最小缩放级别。
+* `maxzoom` : 存储的瓦片数据的最大缩放级别。
 
-* `json` (stringified JSON object): Lists the layers that appear in the vector tiles and the names and types of
-  the attributes of features that appear in those layers. See [below](#vector-tileset-metadata) for more detail.
+**注释：缩放级zoom即xyz瓦片编码中的z**
 
-The `metadata` table MAY contain additional rows for tilesets that implement
-[UTFGrid-based interaction](https://github.com/mapbox/utfgrid-spec) or for
-other purposes.
+**可能包含的属性对：**
+
+* `attribution` : 地图或样式的版权/归属说明，应为HTML字符串。
+* `description` : 地图内容描述。
+* `type` : 地图类型，取值为`overlay` 或 `baselayer`，分别对应于覆盖物和底图。
+* `version` : 瓦片地图数据的版本号（数字）
+
+**当格式为`pbf`时, `metadata` 表必须包含属性对:**
+
+* `json`: JSON字符串，列出矢量瓦片中的图层以及图层中要素属性的名称与类型， 详见 [下文](#矢量瓦片元数据) 。
+
+`metadata` 表允许包含符合[UTFGrid-based interaction](https://github.com/mapbox/utfgrid-spec) 的属性对，以及用于其他目的属性对。
 
 ### 瓦片部分
 
 #### 模式
 
-The database MUST contain a table named `tiles`.
+数据库必须包含名为`tiles`的表。
 
-The table MUST contain three columns of type `integer`, named `zoom_level`, `tile_column`,
-`tile_row`, and one of type `blob`, named `tile_data`.
-A typical `create` statement for the `tiles` table:
+该表必须包含：
++ 字段名`zoom_level`， 类型`integer`
++ 字段名`tile_column`， 类型`integer`
++ 字段名`tile_row`，类型`integer`
++ 字段名`tile_data`，类型`blob`
 
-    CREATE TABLE tiles (zoom_level integer, tile_column integer, tile_row integer, tile_data blob);
+典型的`tiles`表建表语句：
 
-The database MAY contain an index for efficient access to this table:
+ ```CREATE TABLE tiles (zoom_level integer, tile_column integer, tile_row integer, tile_data blob);```
 
-    CREATE UNIQUE INDEX tile_index on tiles (zoom_level, tile_column, tile_row);
+为提高瓦片访问效率，该表可以带有索引：
+
+```CREATE UNIQUE INDEX tile_index on tiles (zoom_level, tile_column, tile_row);```
+
+**注释：强烈建议添加索引**
 
 #### 内容
 
-The tiles table contains tiles and the values used to locate them.
-The `zoom_level`, `tile_column`, and `tile_row` columns MUST encode the location
-of the tile, following the
-[Tile Map Service Specification](http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification),
-with the restriction that
-the [global-mercator](http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification#global-mercator) (aka Spherical Mercator) profile MUST be used.
+`zoom_level`、`tile_column`和`tile_row`三列是瓦片的编号，必须遵循[OSGEO瓦片地图服务规范](http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification)，使用[global-mercator](http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification#global-mercator) (aka Spherical Mercator) 配置。
 
-Note that in the TMS tiling scheme, the Y axis is reversed from the "XYZ" coordinate system commonly used in the URLs
-to request individual tiles, so the tile commonly referred to as 11/327/791 is inserted as
-`zoom_level` 11, `tile_column` 327, and `tile_row` 1256, since 1256 is 2^11 - 1 - 791.
+注意在TMS瓦片地图模式中，Y轴方向与Web地图常用的XYZ瓦片编码相反，因此我们通常使用的编码为11/327/791的瓦片存储时
+`zoom_level`=11，`tile_column`=327，但是`tile_row`=1256（1256 = 2^11 - 1 - 791）。
 
-The `tile_data` column MUST contain the raw binary image or vector tile data
-for the associated tile as a `blob`.
+**注释：XYZ瓦片编码即谷歌地图式编码，路径一般为Z/X/Y形式，Z即缩放级别，X为列号，Y为行号**
+
+`tile_data`必须以`blob`形式存储瓦片影像或矢量瓦片的原始数据。
+
+**注释：即每条记录存储一个瓦片，数据用`tile_data`，编号用`zoom_level`、`tile_column`和`tile_row`**
 
 ### 瓦片格网
 
@@ -178,7 +174,7 @@ a "minor roads" layer is only present at high zoom levels.
 
 ### Tilestats
 
-The JSON object in the `json` row MAY also contain a `tilestats` key, whose value is an object in the "geostats"
+`json`属性的取值（JSON字符串）中，允许包含名为`tilestats`的key, whose value is an object in the "geostats"
 format documented in the [mapbox-geostats](https://github.com/mapbox/mapbox-geostats#output-the-stats)
 repository. Like the `vector_layers`, it lists the tileset's layers and the attributes found
 within each layer, but also gives sample values for each attribute and the range of values for
@@ -367,12 +363,8 @@ have the following metadata table:
 
 ## 未来的改进方向
 
-In a future revision of this specification, the `metadata` table
-will contain a `compression` row to indicate the type of compression
-(if any) that has been applied to tile data.
+未来版本中，`metadata`表可能新增一条`name`为 `compression`的记录，用于标明瓦片数据的压缩格式。
 
-In a future revision of this specification, the `bounds`, `minzoom`,
-and `maxzoom` rows of the `metadata` table will be mandatory.
+未来版本中，`metadata`中`name`为`bounds`、`minzoom`和`maxzoom`的属性对将不再是强烈推荐，而是必选。
 
-A future revision of this specification will delegate the description
-of the `json` row of the `metadata` table to an external specification.
+未来版本中，`metadata`中`name`为`json` 的记录的功能将由外部定义替代。
