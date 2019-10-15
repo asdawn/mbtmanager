@@ -109,9 +109,12 @@ MBTiles文件可以使用[官方定义幻数the officially assigned magic number
 
 *注释：即每条记录存储一个瓦片，数据用`tile_data`，编号用`zoom_level`、`tile_column`和`tile_row`*
 
-### 瓦片格网
+--------------
+此部分涉及UTFGrid（即属性值瓦片格式）规范，暂时跳过。
 
-_See the [UTFGrid specification](https://github.com/mapbox/utfgrid-spec) for
+### 格网
+
+_请参阅[UTFGrid规范](https://github.com/mapbox/utfgrid-spec)。MBTiles规范仅关注数据的存储。 for
 implementation details of grids and interaction metadata itself: the MBTiles
 specification is only concerned with storage._
 
@@ -133,52 +136,70 @@ A typical create statement for the `grid_data` table:
 
 #### 内容
 
-The `grids` table, if present, MUST contain UTFGrid data, compressed in `gzip` format.
+`grids`表若存在，则， MUST contain UTFGrid data, compressed in `gzip` format.
 
 The `grid_data` table, if present, MUST contain grid key to value mappings, with values encoded
 as JSON objects.
 
+------------------
+
 ## 矢量瓦片元数据
 
-As mentioned above, Mapbox Vector Tile tilesets MUST include a `json` row in the `metadata` table
-to summarize what layers are available in the tiles and what attributes are available for the
-features in those layers.
-
-The `json` row, if present, MUST contain the UTF-8 string representation of a JSON object.
+如上文所述，MBTiles文件用于矢量瓦片存储时，`metadata`表必须有`name`为`json`的记录，用UTF-8编码的JSON字符串存储瓦片涉及的图层和属性的基本信息。
 
 ### 矢量图层
 
-The JSON object in the `json` row MUST contain a `vector_layers` key, whose value is an array of JSON objects.
-Each of those JSON objects describes one layer of vector tile data, and MUST contain the following key-value pairs:
+存储矢量瓦片的MBTiles文件的`metadata`表中，`name`为`json`的记录取值为一个JSON字符串，该JSON必须包含一个名为`vector_layers`，取值为JSON对象数据的键值对。对象数据中，每个对象为一个矢量图层的描述信息，并且必须包含以下键值对：
 
 * `id` (string): The layer ID, which is referred to as the `name` of the layer in the [Mapbox Vector Tile spec](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#41-layers).
-* `fields` (object): A JSON object whose keys and values are the names and types of attributes available in this layer.
-Each type MUST be the string `"Number"`, `"Boolean"`, or `"String"`.
-Attributes whose type varies between features SHOULD be listed as `"String"`.
+* `fields`: 存储着图层中属性名称、类型键值对的JSON对象。类型为`"Number"`、`"Boolean"`或者`"String"`。可变类型标记为`"String"`。
 
-Each layer object MAY also contain the following key-value pair:
+每个图层对象还可以包含以下键值对：
 
-* `description` (string): A human-readable description of the layer's contents.
+* `description`: 图层的描述文本
 
-Each layer object MAY also contain the following key-value pair:
+每个图层对象还可以包含以下键值对：
 
-* `minzoom` (number): The lowest zoom level whose tiles this layer appears in.
-* `maxzoom` (number): The highest zoom level whose tiles this layer appears in.
+* `minzoom` : 图层有瓦片数据的最小缩放级别
+* `maxzoom`: 图层有瓦片数据的最大缩放级别
 
-The `minzoom` MUST be greater than or equal to the tileset's `minzoom`,
-and the `maxzoom` MUST be less than or equal to the tileset's `maxzoom`.
+任意图层的`minzoom` >= MBTiles文件的`minzoom`，
+任意图层的`maxzoom` <= MBTiles文件的`maxzoom`。
 
-These keys are used to describe the situation where different sets of vector layers
-appear in different zoom levels of the same tileset, for example in a case where
-a "minor roads" layer is only present at high zoom levels.
+这些键值对用来应对同一个MBTiles文件中不同图层有数据的缩放级别也不同的情况，例如"minor roads"图层仅在较高的缩放级别上有数据。
+
+**注释：说的这么麻烦，看看下边的示例就明白了，JSON字符串的大致结构是
+```JSON
+{  
+   //矢量瓦片必选的vector_layers
+   "vector_layers": [
+      //图层1描述
+      {    
+         "id": "图层的ID",
+         "description": 图层描述信息,
+         "minzoom": 图层瓦片数据的最小缩放级别,
+         "maxzoom": 图层瓦片数据的最大缩放级别,
+         "fields": {
+            "属性1名称": "属性1类型",
+            //其余属性的名称:类型
+          }
+       },
+      //图层2、3、4...的描述
+   ],
+   //可选的tilestates
+   "tilestats": {......}
+}
+``` 
+**
+
+**注释：矢量瓦片允许包含多个图层，不过本程序不关心瓦片内容，只关心瓦片的存储与整个MBTiles的Metadata，且只考虑单图层矢量瓦片**。
 
 ### Tilestats
 
-`json`属性的取值（JSON字符串）中，允许包含名为`tilestats`的key, whose value is an object in the "geostats"
-format documented in the [mapbox-geostats](https://github.com/mapbox/mapbox-geostats#output-the-stats)
-repository. Like the `vector_layers`, it lists the tileset's layers and the attributes found
-within each layer, but also gives sample values for each attribute and the range of values for
-numeric attributes.
+`json`记录对应的`value`（JSON字符串）中，允许包含一个名为`tilestats`的JSON键/值对，其取值为一个"geostats"式对象（参见 [mapbox-geostats](https://github.com/mapbox/mapbox-geostats#output-the-stats)）。与`vector_layers`类似, 它列出了瓦片数据集涉及的图层、各图层的属性，但额外为追加了属性的范例值以及数值属性的取值范围。
+
+**注释：这个JSON字符串中，"vector_layers"必选，"geostats"可选，后者的内容更详细**
+
 
 ### 示例
 
