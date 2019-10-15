@@ -13,7 +13,7 @@ MBTiles文件应使用SQLite数据库的[version 3.0.0](http://sqlite.org/format
 
 MBTiles文件可以使用[官方定义幻数the officially assigned magic number](http://www.sqlite.org/src/artifact?ci=trunk&filename=magic.txt)进行标识，文件头Offset 68，取值0x4d504258表示应用类型为`MBTiles tileset`。
 
-**注释：设置方法为：```PRAGMA application_id =1297105496 ;```**
+*注释：设置方法为：```PRAGMA application_id =1297105496 ;```*
 
 ## 数据库
 
