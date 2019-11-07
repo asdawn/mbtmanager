@@ -7,7 +7,7 @@ A command line tool for accessing .mbtiles files.
 
 ## Functionality
 
-0. Parameters
+0. Parameters and exceptions
 
 `mbtpathIN`: the path of a .mbtiles file as the input.
 
@@ -33,8 +33,10 @@ A command line tool for accessing .mbtiles files.
 
 `xyzlist`: a list file of z,x,y numbers of tiles, one line one tile, no header, values seperated by `Tab`.
 
+If error occurs, the program either `panic` or print an error message then exit. Currently the main work is enable all the functions, exception processing will be considered later.
+
 1. Read a .mbtiles file
-+ Show metadata
++ Show metadata (*done*)
 
         mbtinfo-metadata [mbtpathIN]
         mbtinfo-name [mbtpath]
@@ -49,8 +51,9 @@ A command line tool for accessing .mbtiles files.
         mbtinfo-version [mbtpathIN]
         mbtinfo-json [mbtpathIN]
         mbtinfo-which [mbtpathIN]
+        mbinfo-statistcs [mbtpathIN]
 
-+ Export metadata
++ Export metadata (*suspend*)
 
         mbtinfo-metadata [mbtpathIN] [txtpathOUT]
         mbtinfo-name [mbtpath] [txtpathOUT]
@@ -65,10 +68,7 @@ A command line tool for accessing .mbtiles files.
         mbtinfo-version [mbtpathIN] [txtpathOUT]
         mbtinfo-json [mbtpathIN] [txtpathOUT]
         mbtinfo-which [mbtpathIN] [txtpathOUT]
-
-+ List statistics of tiles
-
-
+        mbinfo-statistcs [mbtpathIN] [txtpathOUT]
 
 + Extract one specified tile according to xyz
 
@@ -86,7 +86,23 @@ A command line tool for accessing .mbtiles files.
 
         mbtextract-all [mbtpathIN] [tiledirOUT]
 
-2. Write
+2. Write a .mbtiles file
+
++ Remove one specified tile according to xyz
+
+        mbtrm-xyz [mbtpathINOUT] [zoom] [x] [y]
+
++ Remove tiles according to a xyz file
+
+        mbtrm-list [mbtpathINOUT] [xyzlist]
+
++ Remove tiles of spedified zoom level
+
+        mbtrm-z [mbtpathINOUT] [xyzlist]
+
++ Remove all tiles
+
+        mbtrm-all [mbtpathINOUT]
 
 + Create an empty .mbtiles file
 

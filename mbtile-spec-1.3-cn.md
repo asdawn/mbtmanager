@@ -3,7 +3,7 @@
 
 ## 摘要
 
-MBTiles是实用[SQLite](http://sqlite.org/)存储瓦片地图的一种规范。
+MBTiles是使用[SQLite](http://sqlite.org/)存储瓦片地图的一种规范。
 
 MBTiles文件（即**tilesets**）应遵循以下规范以确保兼容性。
 
